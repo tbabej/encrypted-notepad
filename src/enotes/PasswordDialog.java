@@ -147,7 +147,11 @@ public class PasswordDialog extends javax.swing.JDialog {
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
         
+
         GetPasswordFromCard(this.cardManager);
+
+        if(GetPasswordFromCard(this.cardManager))
+            clickOk();
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void clickOk() {
@@ -212,10 +216,15 @@ public class PasswordDialog extends javax.swing.JDialog {
             }
             else
             {
+
                 
                 System.out.println("Password Retreived Sucessfully!!") ;   
                 pwd = Arrays.toString(response1);
                 this.setVisible(false);
+
+                System.out.println("Password Retreived Sucessfully!!") ;   
+                
+
                 
             }
 

@@ -33,6 +33,7 @@ import enotes.cardmanager.eNoteApplet;
 import enotes.cardmanager.CardManager;
 
 
+
 /**
  *
  * @author ivoras
@@ -410,7 +411,9 @@ public class MainForm extends javax.swing.JFrame {
 
     private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem4ActionPerformed
         // TODO add your handling code here:
+
         ResetCard();
+
     }//GEN-LAST:event_jMenuItem4ActionPerformed
 
     private void jMenuItem5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem5ActionPerformed
@@ -445,6 +448,7 @@ public class MainForm extends javax.swing.JFrame {
     private javax.swing.JTextField tfFind;
     private javax.swing.JTextPane tp;
     // End of variables declaration//GEN-END:variables
+
 
 
     private boolean ResetCard()
@@ -562,13 +566,16 @@ public class MainForm extends javax.swing.JFrame {
             cardManager.DisconnectFromCard();
             this.pd.Reintialize();
             JOptionPane.showMessageDialog(this, "Card is disConnected");
-            System.out.println("Card is disConnected");
         }
         catch (Exception ex) {
             System.out.println("Exception : " + ex);
         }
+      
     }
-    
+
+      
+   
+   
     private boolean canExit() {
         return checkSave(WHYSAVE_CLOSE) != OPT_CANCEL;
     }

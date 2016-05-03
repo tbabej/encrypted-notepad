@@ -22,6 +22,9 @@ public class UserPINDialog extends javax.swing.JDialog {
     int UserAuth = 0;
     int Cancel = 0;
     int ResetCounter=0;
+    int AttemptsNumber=0;
+ 
+
     CardManager cardManager ;
     
        
@@ -190,6 +193,12 @@ public class UserPINDialog extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(this, "The user pin do not match!");
             this.UserAuth = 0 ;
             jTextField1.setText("");
+            this.AttemptsNumber +=1;
+            if(AttemptsNumber==3){
+                JOptionPane.showMessageDialog(this, "Exceed max attempts");
+                System.exit(1);
+            }
+                
             return;
         }
         this.setVisible(false);
