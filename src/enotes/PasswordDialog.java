@@ -12,16 +12,20 @@
 
 package enotes;
 
+import enotes.cardmanager.CardManager;
 import java.awt.event.KeyEvent;
+import java.util.Arrays;
 import javax.swing.JOptionPane;
 
 /**
  *
  * @author ivoras
  */
+
 public class PasswordDialog extends javax.swing.JDialog {
 
     private String pwd = null;
+    CardManager cardManager;
 
     /** Creates new form PasswordDialog */
     public PasswordDialog() {
@@ -43,6 +47,7 @@ public class PasswordDialog extends javax.swing.JDialog {
         pwf2 = new javax.swing.JPasswordField();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
+        jButton3 = new javax.swing.JButton();
 
         setTitle("Enter password");
         setResizable(false);
@@ -71,26 +76,36 @@ public class PasswordDialog extends javax.swing.JDialog {
             }
         });
 
+        jButton3.setText("GetKey");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel2)
                             .addComponent(jLabel1))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(pwf1, javax.swing.GroupLayout.PREFERRED_SIZE, 248, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(pwf2)))
+                            .addComponent(pwf2))
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(125, 125, 125)
+                        .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(jButton1)
+                        .addGap(12, 12, 12)
+                        .addComponent(jButton2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButton2)))
+                        .addComponent(jButton3)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -107,7 +122,8 @@ public class PasswordDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton2)
-                    .addComponent(jButton1))
+                    .addComponent(jButton1)
+                    .addComponent(jButton3))
                 .addContainerGap(15, Short.MAX_VALUE))
         );
 
@@ -128,6 +144,16 @@ public class PasswordDialog extends javax.swing.JDialog {
             clickOk();
     }//GEN-LAST:event_pwf2KeyReleased
 
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        // TODO add your handling code here:
+
+        if(GetPasswordFromCard(this.cardManager))
+        {
+            JOptionPane.showMessageDialog(this, "Key successfully retrieved from the card.");
+            this.setVisible(false);
+        }
+    }//GEN-LAST:event_jButton3ActionPerformed
+
     private void clickOk() {
         String p1 = new String(pwf1.getPassword());
         String p2 = new String(pwf2.getPassword());
@@ -143,6 +169,7 @@ public class PasswordDialog extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPasswordField pwf1;
@@ -150,13 +177,63 @@ public class PasswordDialog extends javax.swing.JDialog {
     // End of variables declaration//GEN-END:variables
 
 
-    public static String getPassword() {
+    public static String getPassword(CardManager cardManager) {
+        
         PasswordDialog pd = new PasswordDialog();
+        pd.cardManager = cardManager;
         pd.setResizable(false);
         pd.setModal(true);
         pd.setLocationRelativeTo(null);
         pd.setVisible(true);
 
         return pd.pwd;
+    }
+    
+    boolean GetPasswordFromCard(CardManager cardManager)
+    {
+        // Make sure the card is unlocked
+        if (!cardManager.m_card_authenticated){
+            JOptionPane.showMessageDialog(this, "The card is not unlocked.");
+            return false;
+        }
+            
+        //Validate PIN
+        try{
+            short additionalDataLen1 = 4;
+            byte apdu1[] = new byte[CardManager.HEADER_LENGTH + additionalDataLen1];
+
+            apdu1[CardManager.OFFSET_CLA] = (byte) 0xB0;
+            apdu1[CardManager.OFFSET_INS] = (byte) 0x55;
+            apdu1[CardManager.OFFSET_P1] = (byte) 0x00;
+            apdu1[CardManager.OFFSET_P2] = (byte) 0x00;
+            apdu1[CardManager.OFFSET_LC] = (byte) additionalDataLen1;
+
+
+            byte[] UserPassword ; //= jTextField1.getText().getBytes();
+          
+            byte[] response1 = cardManager.sendAPDUSimulator(apdu1); 
+            System.out.println(cardManager.bytesToHex(response1));
+            
+            int k=response1.length;
+            if(response1[k-2] != 0x90 && response1[k-1] != 0x00){
+                System.out.println("Incorret PIN !!");
+                //System.exit(0);
+                return false ;
+            }
+            else
+            {     
+                System.out.println("Password Retreived Sucessfully!!") ;   
+                pwd = Arrays.toString(response1);
+                this.setVisible(false);                 
+            }
+
+            System.out.println("---PIN Validation Completed---") ;
+        }
+        catch(Exception ex)
+        {
+            System.out.println("Exception : " + ex);
+        }
+        
+        return true;
     }
 }

@@ -29,12 +29,31 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.text.Document;
 import javax.swing.text.Element;
 
+import enotes.cardmanager.eNoteApplet;
+import enotes.cardmanager.CardManager;
+
+
+
 /**
  *
  * @author ivoras
  */
 public class MainForm extends javax.swing.JFrame {
-
+    
+    /**************************** Java Card *****/
+    static CardManager cardManager = new CardManager();
+    UserPINDialog pd = new UserPINDialog();
+    
+    
+    private static byte APPLET_AID[] = {(byte) 0x65, (byte) 0x4e, (byte) 0x6f, (byte) 0x74, (byte) 0x65,
+        (byte) 0x41, (byte) 0x70, (byte) 0x70, (byte) 0x6C, (byte) 0x65, (byte) 0x74};
+    
+    private static byte UserPIN[] = {(byte)0x30,(byte)0x30,(byte)0x30,(byte)0x30} ;
+    private static byte[] SELECT_ENOTESAPPLET = {(byte) 0x00, (byte) 0xa4, (byte) 0x04, (byte) 0x00, (byte) 0x0b, 
+        (byte) 0x65, (byte) 0x4e, (byte) 0x6f, (byte) 0x74, (byte) 0x65,
+        (byte) 0x41, (byte) 0x70, (byte) 0x70, (byte) 0x6C, (byte) 0x65, (byte) 0x74};
+    // 654e6f7465 4170706c6574
+    /*******************************************************************/
     static final int OPT_SAVE = 1;
     static final int OPT_NOSAVE = 2;
     static final int OPT_CANCEL = 3;
@@ -91,8 +110,14 @@ public class MainForm extends javax.swing.JFrame {
         miExit = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         miFind = new javax.swing.JMenuItem();
+        jMenu4 = new javax.swing.JMenu();
+        jMenuItem1 = new javax.swing.JMenuItem();
+        jMenuItem2 = new javax.swing.JMenuItem();
+        jMenuItem3 = new javax.swing.JMenuItem();
+        jMenuItem4 = new javax.swing.JMenuItem();
         jMenu3 = new javax.swing.JMenu();
         miAbout = new javax.swing.JMenuItem();
+        jMenuItem5 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("Encrypted Notes");
@@ -143,7 +168,7 @@ public class MainForm extends javax.swing.JFrame {
 
         getContentPane().add(jPanel1, java.awt.BorderLayout.SOUTH);
 
-        tp.setFont(new java.awt.Font("Monospaced", 0, 12));
+        tp.setFont(new java.awt.Font("Monospaced", 0, 12)); // NOI18N
         tp.addInputMethodListener(new java.awt.event.InputMethodListener() {
             public void inputMethodTextChanged(java.awt.event.InputMethodEvent evt) {
             }
@@ -224,6 +249,42 @@ public class MainForm extends javax.swing.JFrame {
 
         jMenuBar1.add(jMenu2);
 
+        jMenu4.setText("Tool");
+
+        jMenuItem1.setText("ConnectCard");
+        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem1ActionPerformed(evt);
+            }
+        });
+        jMenu4.add(jMenuItem1);
+
+        jMenuItem2.setText("DisconnectCard");
+        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem2ActionPerformed(evt);
+            }
+        });
+        jMenu4.add(jMenuItem2);
+
+        jMenuItem3.setText("DisplayCardInfo");
+        jMenuItem3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem3ActionPerformed(evt);
+            }
+        });
+        jMenu4.add(jMenuItem3);
+
+        jMenuItem4.setText("ResetCard");
+        jMenuItem4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem4ActionPerformed(evt);
+            }
+        });
+        jMenu4.add(jMenuItem4);
+
+        jMenuBar1.add(jMenu4);
+
         jMenu3.setText("Help");
 
         miAbout.setText("About");
@@ -233,6 +294,14 @@ public class MainForm extends javax.swing.JFrame {
             }
         });
         jMenu3.add(miAbout);
+
+        jMenuItem5.setText("Javacard");
+        jMenuItem5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem5ActionPerformed(evt);
+            }
+        });
+        jMenu3.add(jMenuItem5);
 
         jMenuBar1.add(jMenu3);
 
@@ -329,13 +398,44 @@ public class MainForm extends javax.swing.JFrame {
                 "Released under the BSD License\nProject web: http://sourceforge.net/projects/enotes\n\nUsing "+Doc.CRYPTO_MODE);
     }//GEN-LAST:event_miAboutActionPerformed
 
+    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+        // TODO add your handling code here:
+        ConnectCard();
+    }//GEN-LAST:event_jMenuItem1ActionPerformed
+
+    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
+        // TODO add your handling code here:
+        DisconnectCard();
+    }//GEN-LAST:event_jMenuItem2ActionPerformed
+
+    private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jMenuItem3ActionPerformed
+
+    private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem4ActionPerformed
+        // TODO add your handling code here:
+
+        SetCardPIN();
+
+    }//GEN-LAST:event_jMenuItem4ActionPerformed
+
+    private void jMenuItem5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem5ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jMenuItem5ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btFind;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenu jMenu3;
+    private javax.swing.JMenu jMenu4;
     private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem jMenuItem2;
+    private javax.swing.JMenuItem jMenuItem3;
+    private javax.swing.JMenuItem jMenuItem4;
+    private javax.swing.JMenuItem jMenuItem5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
@@ -353,6 +453,102 @@ public class MainForm extends javax.swing.JFrame {
     // End of variables declaration//GEN-END:variables
 
 
+
+    private boolean SetCardPIN()
+    {
+        try 
+        {
+            byte[] installData = new byte[10]; // no special install data passed now - can be used to pass initial keys etc.
+            //cardManager.prepareLocalSimulatorApplet(APPLET_AID, installData, eNoteApplet.class); 
+            byte apdu_setPIN[]={(byte) 0xB0,(byte) 0x50,(byte) 0x00,(byte) 0x00,(byte) 0x04,
+                      (byte) 0x30,(byte) 0x31,(byte) 0x30,(byte) 0x31};
+        byte[] resp1 = cardManager.sendAPDUSimulator(apdu_setPIN);
+        if((resp1[(resp1.length)-2])== (byte) 0x90)
+            System.out.println("***PIN set success***");
+        else{
+            System.out.println("PIN set failed with error code "+ cardManager.bytesToHex(resp1));
+            return false;
+        }
+        } 
+        catch (Exception ex) {
+            System.out.println("Exception : " + ex);
+        }
+        this.pd.ResetCounter=1;
+        JOptionPane.showMessageDialog(this, "The user pin is set successfully");
+        return true;
+        
+    }
+    
+    private boolean ConnectCard()
+    {
+        try 
+        {
+            byte[] installData = new byte[10]; // no special install data passed now - can be used to pass initial keys etc.
+            cardManager.prepareLocalSimulatorApplet(APPLET_AID, installData, eNoteApplet.class);  
+            //if (cardManager.ConnectToCard())
+            //    cardManager.sendAPDU(SELECT_ENOTESAPPLET);
+    
+            System.out.println("Card Connected");
+//            if( this.pd.ResetCounter == 0)
+//            {
+//                System.out.println("First set the PIN");
+//                JOptionPane.showMessageDialog(this, "First set the PIN");
+//                return false;
+//            }
+            
+            if( this.pd.UserAuth == 1)
+            {
+                System.out.println("User already connected!!");
+                JOptionPane.showMessageDialog(this, "User already connected!!");
+                return true;
+            }
+           
+            pd.SetCardManager(cardManager);
+            pd.setResizable(false);
+            pd.setModal(true);
+            pd.setLocationRelativeTo(null);
+            pd.setVisible(true);                    
+            
+            if(pd.UserAuth == 0)
+            {
+                System.out.println("User not Authenticated!!");
+                pd.setVisible(false);
+                return false ;
+            }
+            else if(pd.Cancel == 1)
+            {
+                pd.setVisible(false);
+                return false ;                
+            }
+            
+           
+                       
+
+            
+        } catch (Exception ex) {
+            System.out.println("Exception : " + ex);
+        }
+        JOptionPane.showMessageDialog(this, "JavaCard connected");
+        return true ;
+    }
+    
+    void DisconnectCard() 
+    {
+        try
+        {
+            cardManager.DisconnectFromCard();
+            this.pd.Reintialize();
+            JOptionPane.showMessageDialog(this, "Card is disConnected");
+        }
+        catch (Exception ex) {
+            System.out.println("Exception : " + ex);
+        }
+      
+    }
+
+      
+   
+   
     private boolean canExit() {
         return checkSave(WHYSAVE_CLOSE) != OPT_CANCEL;
     }
@@ -394,7 +590,7 @@ public class MainForm extends javax.swing.JFrame {
         }
 
         if (docm.key == null) {
-            String pwd = PasswordDialog.getPassword();
+            String pwd = PasswordDialog.getPassword(cardManager);
             if (pwd == null)
                 return OPT_CANCEL;
             docm.setKey(pwd);
@@ -515,7 +711,7 @@ public class MainForm extends javax.swing.JFrame {
         Doc doc = new Doc();
         while (true) {
             try {
-                String pwd = PasswordDialog.getPassword();
+                String pwd = PasswordDialog.getPassword(cardManager);
                 if (pwd == null)
                     return false;
                 if (doc.doOpen(fOpen, pwd))
