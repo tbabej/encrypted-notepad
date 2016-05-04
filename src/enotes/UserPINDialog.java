@@ -66,19 +66,15 @@ public class UserPINDialog extends javax.swing.JDialog {
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
+        jPasswordField1 = new javax.swing.JPasswordField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Authenticate yourself!");
+        setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
 
         jLabel1.setText("Enter User PIN");
-
-        jTextField1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField1ActionPerformed(evt);
-            }
-        });
 
         jButton1.setText("Ok");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
@@ -107,7 +103,7 @@ public class UserPINDialog extends javax.swing.JDialog {
                         .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jButton2))
-                    .addComponent(jTextField1))
+                    .addComponent(jPasswordField1))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -116,8 +112,8 @@ public class UserPINDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                    .addComponent(jPasswordField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
                     .addComponent(jButton2))
@@ -131,11 +127,6 @@ public class UserPINDialog extends javax.swing.JDialog {
         // TODO add your handling code here:
         OkButton();
     }//GEN-LAST:event_jButton1ActionPerformed
-
-    private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
-        // TODO add your handling code here:
-        
-    }//GEN-LAST:event_jTextField1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
@@ -186,25 +177,26 @@ public class UserPINDialog extends javax.swing.JDialog {
 
     void OkButton()
     {
-        //String p1 = new String(jTextField1.getText());
         //String p2 = new String("1234");
        
         if (!CheckPIN()) {
             JOptionPane.showMessageDialog(this, "The user pin do not match!");
             this.UserAuth = 0 ;
-            jTextField1.setText("");
             this.AttemptsNumber +=1;
+            
             if(AttemptsNumber==3){
                 JOptionPane.showMessageDialog(this, "Exceed max attempts");
                 System.exit(1);
             }
-                
+            
+            // Clear the password field after unsuccesful attempt
+            jPasswordField1.setText("");         
             return;
         }
         this.setVisible(false);
         this.UserAuth = 1 ;
         
-        jTextField1.setText("");
+        jPasswordField1.setText("");
         
     }
     
@@ -212,7 +204,7 @@ public class UserPINDialog extends javax.swing.JDialog {
     {
         this.setVisible(false);
         this.Cancel = 1 ;
-         jTextField1.setText("");
+         jPasswordField1.setText("");
     }
     
     void Reintialize()
@@ -242,7 +234,8 @@ public class UserPINDialog extends javax.swing.JDialog {
             apdu1[CardManager.OFFSET_LC] = (byte) additionalDataLen1;
 
 
-            byte[] UserPIN1 = jTextField1.getText().getBytes();
+            char[] UserPIN1 = jPasswordField1.getPassword();
+            //byte UserPINB[];
             
             if(UserPIN1.length != 4){
                 System.out.println("Incorret PIN !!");
@@ -250,12 +243,12 @@ public class UserPINDialog extends javax.swing.JDialog {
                 return false ;                
             }
             byte[] UserPIN =new byte[16];    
-            for(int i=0; i < UserPIN1.length; i++)
-                System.out.printf("0x%2x ",UserPIN1[i]);
+            //for(int i=0; i < UserPIN1.length; i++)
+            //    System.out.printf("0x%2x ",(byte)UserPIN1[i]);
 
             for(int i=0; i<16; i++){
                 if(i<4)
-                    UserPIN[i]=UserPIN1[i];
+                    UserPIN[i]= (byte) UserPIN1[i];
                 else
                     UserPIN[i]= (byte) 0;
             }
@@ -286,13 +279,14 @@ public class UserPINDialog extends javax.swing.JDialog {
         catch(Exception ex) {
             System.out.println("Exception : " + ex);
         }
-        return true ;
+        cardManager.setM_card_authenticated(true);
+        return true;
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JTextField jTextField1;
+    private javax.swing.JPasswordField jPasswordField1;
     // End of variables declaration//GEN-END:variables
 }

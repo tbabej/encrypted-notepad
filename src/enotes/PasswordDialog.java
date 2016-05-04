@@ -146,12 +146,12 @@ public class PasswordDialog extends javax.swing.JDialog {
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
-        
-
-        GetPasswordFromCard(this.cardManager);
 
         if(GetPasswordFromCard(this.cardManager))
-            clickOk();
+        {
+            JOptionPane.showMessageDialog(this, "Key successfully retrieved from the card.");
+            this.setVisible(false);
+        }
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void clickOk() {
@@ -191,6 +191,12 @@ public class PasswordDialog extends javax.swing.JDialog {
     
     boolean GetPasswordFromCard(CardManager cardManager)
     {
+        // Make sure the card is unlocked
+        if (!cardManager.m_card_authenticated){
+            JOptionPane.showMessageDialog(this, "The card is not unlocked.");
+            return false;
+        }
+            
         //Validate PIN
         try{
             short additionalDataLen1 = 4;
@@ -215,17 +221,10 @@ public class PasswordDialog extends javax.swing.JDialog {
                 return false ;
             }
             else
-            {
-
-                
+            {     
                 System.out.println("Password Retreived Sucessfully!!") ;   
                 pwd = Arrays.toString(response1);
-                this.setVisible(false);
-
-                System.out.println("Password Retreived Sucessfully!!") ;   
-                
-
-                
+                this.setVisible(false);                 
             }
 
             System.out.println("---PIN Validation Completed---") ;
@@ -235,6 +234,6 @@ public class PasswordDialog extends javax.swing.JDialog {
             System.out.println("Exception : " + ex);
         }
         
-        return true ;
+        return true;
     }
 }

@@ -253,16 +253,10 @@ public class eNoteApplet extends javacard.framework.Applet
       
       //  m_encryptCipher_CBC.doFinal(apdubuf, ISO7816.OFFSET_CDATA, dataLen, m_ramArray, (short) 0);
      m_decryptCipher_CBC.doFinal(apdubuf, ISO7816.OFFSET_CDATA, dataLen, m_ramArray, (short) 0);
-     byte apdu1[] = new byte[CardManager.HEADER_LENGTH + 4];
-     apdu1[CardManager.OFFSET_CLA] = (byte) 0xB0;
-     apdu1[CardManager.OFFSET_INS] = (byte) 0x51;
-     apdu1[CardManager.OFFSET_P1] = (byte) 0x00;
-     apdu1[CardManager.OFFSET_P2] = (byte) 0x00;
-     apdu1[CardManager.OFFSET_LC] = (byte) 4;
-     Util.arrayCopyNonAtomic(m_ramArray, (short) 0, apdu1, ISO7816.OFFSET_CDATA, (byte)4);
+     Util.arrayCopyNonAtomic(m_ramArray, (short) 0, apdubuf, ISO7816.OFFSET_CDATA, (byte)4);
      
       // VERIFY PIN
-      if (m_pin.check(apdu1, ISO7816.OFFSET_CDATA, (byte) 4) == false)
+      if (m_pin.check(apdubuf, ISO7816.OFFSET_CDATA, (byte) 4) == false)
          ISOException.throwIt(SW_PIN_VERIFICATION_FAILED);
                 
     }

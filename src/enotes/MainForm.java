@@ -45,11 +45,14 @@ public class MainForm extends javax.swing.JFrame {
     UserPINDialog pd = new UserPINDialog();
     
     
-    private static byte APPLET_AID[] = {(byte) 0x4C, (byte) 0x61, (byte) 0x62, (byte) 0x61, (byte) 0x6B,
+    private static byte APPLET_AID[] = {(byte) 0x65, (byte) 0x4e, (byte) 0x6f, (byte) 0x74, (byte) 0x65,
         (byte) 0x41, (byte) 0x70, (byte) 0x70, (byte) 0x6C, (byte) 0x65, (byte) 0x74};
     
     private static byte UserPIN[] = {(byte)0x30,(byte)0x30,(byte)0x30,(byte)0x30} ;
-    
+    private static byte[] SELECT_ENOTESAPPLET = {(byte) 0x00, (byte) 0xa4, (byte) 0x04, (byte) 0x00, (byte) 0x0b, 
+        (byte) 0x65, (byte) 0x4e, (byte) 0x6f, (byte) 0x74, (byte) 0x65,
+        (byte) 0x41, (byte) 0x70, (byte) 0x70, (byte) 0x6C, (byte) 0x65, (byte) 0x74};
+    // 654e6f7465 4170706c6574
     /*******************************************************************/
     static final int OPT_SAVE = 1;
     static final int OPT_NOSAVE = 2;
@@ -412,7 +415,7 @@ public class MainForm extends javax.swing.JFrame {
     private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem4ActionPerformed
         // TODO add your handling code here:
 
-        ResetCard();
+        SetCardPIN();
 
     }//GEN-LAST:event_jMenuItem4ActionPerformed
 
@@ -451,12 +454,12 @@ public class MainForm extends javax.swing.JFrame {
 
 
 
-    private boolean ResetCard()
+    private boolean SetCardPIN()
     {
         try 
         {
             byte[] installData = new byte[10]; // no special install data passed now - can be used to pass initial keys etc.
-            cardManager.prepareLocalSimulatorApplet(APPLET_AID, installData, eNoteApplet.class); 
+            //cardManager.prepareLocalSimulatorApplet(APPLET_AID, installData, eNoteApplet.class); 
             byte apdu_setPIN[]={(byte) 0xB0,(byte) 0x50,(byte) 0x00,(byte) 0x00,(byte) 0x04,
                       (byte) 0x30,(byte) 0x31,(byte) 0x30,(byte) 0x31};
         byte[] resp1 = cardManager.sendAPDUSimulator(apdu_setPIN);
@@ -482,15 +485,16 @@ public class MainForm extends javax.swing.JFrame {
         {
             byte[] installData = new byte[10]; // no special install data passed now - can be used to pass initial keys etc.
             cardManager.prepareLocalSimulatorApplet(APPLET_AID, installData, eNoteApplet.class);  
-            //cardManager.sendAPDU(SELECT_SIMPLEAPPLET);
+            //if (cardManager.ConnectToCard())
+            //    cardManager.sendAPDU(SELECT_ENOTESAPPLET);
     
             System.out.println("Card Connected");
-            if( this.pd.ResetCounter == 0)
-            {
-                System.out.println("First set the PIN");
-                JOptionPane.showMessageDialog(this, "First set the PIN");
-                return false;
-            }
+//            if( this.pd.ResetCounter == 0)
+//            {
+//                System.out.println("First set the PIN");
+//                JOptionPane.showMessageDialog(this, "First set the PIN");
+//                return false;
+//            }
             
             if( this.pd.UserAuth == 1)
             {
@@ -519,38 +523,7 @@ public class MainForm extends javax.swing.JFrame {
             
            
                        
-            //Validate PIN
-            /*
-            short additionalDataLen1 = 4;
-            byte apdu1[] = new byte[CardManager.HEADER_LENGTH + additionalDataLen1];
-                        
-            apdu1[CardManager.OFFSET_CLA] = (byte) 0xB0;
-            apdu1[CardManager.OFFSET_INS] = (byte) 0x51;
-            apdu1[CardManager.OFFSET_P1] = (byte) 0x00;
-            apdu1[CardManager.OFFSET_P2] = (byte) 0x00;
-            apdu1[CardManager.OFFSET_LC] = (byte) additionalDataLen1;
-            
-            for(int i=0; i<4; i++)
-            {
-                apdu1[CardManager.OFFSET_DATA+i]   = UserPIN[i];                
-            }
-            System.out.println("---PIN Validation Started---") ;             
-            System.out.printf("Input PIN for Validation: ") ;           
-            System.out.println(cardManager.bytesToHex(UserPIN));
-            
-            byte[] response1 = cardManager.sendAPDUSimulator(apdu1); 
-                                 
-            if(response1[0] != 0x90 && response1[1] != 0x00){
-                System.out.println("Incorret PIN !!");
-                System.exit(0);
-            }
-            else
-            {
-                System.out.println("PIN is Validated Sucessfully!!") ;   
-            }
-            
-            System.out.println("---PIN Validation Completed---") ;  
-*/
+
             
         } catch (Exception ex) {
             System.out.println("Exception : " + ex);

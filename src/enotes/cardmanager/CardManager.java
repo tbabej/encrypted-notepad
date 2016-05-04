@@ -22,9 +22,15 @@ import javax.smartcardio.*;
  */
 public class CardManager {
     
-     CardTerminal m_terminal = null;
+    CardTerminal m_terminal = null;
     CardChannel m_channel = null;
     Card m_card = null;
+    
+    public boolean m_card_authenticated = false;
+
+    public void setM_card_authenticated(boolean m_card_authenticated) {
+        this.m_card_authenticated = m_card_authenticated;
+    }
     
     // Simulator related attributes
     private static CAD m_cad = null;
