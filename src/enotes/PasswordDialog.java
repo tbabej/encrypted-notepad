@@ -12,9 +12,12 @@
 
 package enotes;
 
+import enotes.cardmanager.CardAPI;
 import enotes.cardmanager.CardManager;
 import java.awt.event.KeyEvent;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 /**
@@ -25,7 +28,11 @@ import javax.swing.JOptionPane;
 public class PasswordDialog extends javax.swing.JDialog {
 
     private String pwd = null;
-    CardManager cardManager;
+    CardAPI cardAPI;
+
+    public void setCardAPI(CardAPI cardAPI) {
+        this.cardAPI = cardAPI;
+    }
 
     /** Creates new form PasswordDialog */
     public PasswordDialog() {
@@ -76,7 +83,7 @@ public class PasswordDialog extends javax.swing.JDialog {
             }
         });
 
-        jButton3.setText("GetKey");
+        jButton3.setText("Obtain from card");
         jButton3.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton3ActionPerformed(evt);
@@ -145,12 +152,21 @@ public class PasswordDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_pwf2KeyReleased
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        // TODO add your handling code here:
-
-        if(GetPasswordFromCard(this.cardManager))
-        {
-            JOptionPane.showMessageDialog(this, "Key successfully retrieved from the card.");
-            this.setVisible(false);
+        try {           
+            pwd = cardAPI.GetPasswordFromCard();
+            
+            if(pwd != null)
+            {
+                JOptionPane.showMessageDialog(this, "Key successfully retrieved from the card.");
+                this.setVisible(false);
+            }
+        } catch (EnotesException ex) {
+            JOptionPane.showMessageDialog(
+                this,
+                ex.getMessage(), 
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+            );
         }
     }//GEN-LAST:event_jButton3ActionPerformed
 
@@ -177,10 +193,10 @@ public class PasswordDialog extends javax.swing.JDialog {
     // End of variables declaration//GEN-END:variables
 
 
-    public static String getPassword(CardManager cardManager) {
+    public static String getPassword(CardAPI cardAPI) {
         
         PasswordDialog pd = new PasswordDialog();
-        pd.cardManager = cardManager;
+        pd.cardAPI = cardAPI;
         pd.setResizable(false);
         pd.setModal(true);
         pd.setLocationRelativeTo(null);
@@ -189,51 +205,5 @@ public class PasswordDialog extends javax.swing.JDialog {
         return pd.pwd;
     }
     
-    boolean GetPasswordFromCard(CardManager cardManager)
-    {
-        // Make sure the card is unlocked
-        if (!cardManager.m_card_authenticated){
-            JOptionPane.showMessageDialog(this, "The card is not unlocked.");
-            return false;
-        }
-            
-        //Validate PIN
-        try{
-            short additionalDataLen1 = 4;
-            byte apdu1[] = new byte[CardManager.HEADER_LENGTH + additionalDataLen1];
 
-            apdu1[CardManager.OFFSET_CLA] = (byte) 0xB0;
-            apdu1[CardManager.OFFSET_INS] = (byte) 0x55;
-            apdu1[CardManager.OFFSET_P1] = (byte) 0x00;
-            apdu1[CardManager.OFFSET_P2] = (byte) 0x00;
-            apdu1[CardManager.OFFSET_LC] = (byte) additionalDataLen1;
-
-
-            byte[] UserPassword ; //= jTextField1.getText().getBytes();
-          
-            byte[] response1 = cardManager.sendAPDUSimulator(apdu1); 
-            System.out.println(cardManager.bytesToHex(response1));
-            
-            int k=response1.length;
-            if(response1[k-2] != 0x90 && response1[k-1] != 0x00){
-                System.out.println("Incorret PIN !!");
-                //System.exit(0);
-                return false ;
-            }
-            else
-            {     
-                System.out.println("Password Retreived Sucessfully!!") ;   
-                pwd = Arrays.toString(response1);
-                this.setVisible(false);                 
-            }
-
-            System.out.println("---PIN Validation Completed---") ;
-        }
-        catch(Exception ex)
-        {
-            System.out.println("Exception : " + ex);
-        }
-        
-        return true;
-    }
 }

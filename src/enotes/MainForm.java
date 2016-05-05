@@ -12,6 +12,7 @@
 
 package enotes;
 
+import enotes.cardmanager.CardAPI;
 import enotes.doc.DocMetadata;
 import enotes.doc.DocException;
 import enotes.doc.Doc;
@@ -41,18 +42,9 @@ import enotes.cardmanager.CardManager;
 public class MainForm extends javax.swing.JFrame {
     
     /**************************** Java Card *****/
-    static CardManager cardManager = new CardManager();
-    UserPINDialog pd = new UserPINDialog();
+    static CardAPI cardAPI = new CardAPI();
+    UserPINDialog pinDialog = new UserPINDialog();
     
-    
-    private static byte APPLET_AID[] = {(byte) 0x65, (byte) 0x4e, (byte) 0x6f, (byte) 0x74, (byte) 0x65,
-        (byte) 0x41, (byte) 0x70, (byte) 0x70, (byte) 0x6C, (byte) 0x65, (byte) 0x74};
-    
-    private static byte UserPIN[] = {(byte)0x30,(byte)0x30,(byte)0x30,(byte)0x30} ;
-    private static byte[] SELECT_ENOTESAPPLET = {(byte) 0x00, (byte) 0xa4, (byte) 0x04, (byte) 0x00, (byte) 0x0b, 
-        (byte) 0x65, (byte) 0x4e, (byte) 0x6f, (byte) 0x74, (byte) 0x65,
-        (byte) 0x41, (byte) 0x70, (byte) 0x70, (byte) 0x6C, (byte) 0x65, (byte) 0x74};
-    // 654e6f7465 4170706c6574
     /*******************************************************************/
     static final int OPT_SAVE = 1;
     static final int OPT_NOSAVE = 2;
@@ -113,7 +105,6 @@ public class MainForm extends javax.swing.JFrame {
         jMenu4 = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
         jMenuItem2 = new javax.swing.JMenuItem();
-        jMenuItem3 = new javax.swing.JMenuItem();
         jMenuItem4 = new javax.swing.JMenuItem();
         jMenu3 = new javax.swing.JMenu();
         miAbout = new javax.swing.JMenuItem();
@@ -251,7 +242,7 @@ public class MainForm extends javax.swing.JFrame {
 
         jMenu4.setText("Tool");
 
-        jMenuItem1.setText("ConnectCard");
+        jMenuItem1.setText("Connect Card");
         jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItem1ActionPerformed(evt);
@@ -259,7 +250,7 @@ public class MainForm extends javax.swing.JFrame {
         });
         jMenu4.add(jMenuItem1);
 
-        jMenuItem2.setText("DisconnectCard");
+        jMenuItem2.setText("Disconnect Card");
         jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItem2ActionPerformed(evt);
@@ -267,15 +258,7 @@ public class MainForm extends javax.swing.JFrame {
         });
         jMenu4.add(jMenuItem2);
 
-        jMenuItem3.setText("DisplayCardInfo");
-        jMenuItem3.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem3ActionPerformed(evt);
-            }
-        });
-        jMenu4.add(jMenuItem3);
-
-        jMenuItem4.setText("ResetCard");
+        jMenuItem4.setText("Reset Card");
         jMenuItem4.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItem4ActionPerformed(evt);
@@ -408,15 +391,16 @@ public class MainForm extends javax.swing.JFrame {
         DisconnectCard();
     }//GEN-LAST:event_jMenuItem2ActionPerformed
 
-    private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jMenuItem3ActionPerformed
-
     private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem4ActionPerformed
         // TODO add your handling code here:
-
-        SetCardPIN();
-
+        try {
+            cardAPI.setPIN();
+            JOptionPane.showMessageDialog(this, "The user pin is set successfully");
+        }
+        catch (EnotesException ex){
+            JOptionPane.showMessageDialog(this, "The user PIN setup failed",
+                    "PIN setup", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_jMenuItem4ActionPerformed
 
     private void jMenuItem5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem5ActionPerformed
@@ -433,7 +417,6 @@ public class MainForm extends javax.swing.JFrame {
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem2;
-    private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JMenuItem jMenuItem4;
     private javax.swing.JMenuItem jMenuItem5;
     private javax.swing.JPanel jPanel1;
@@ -451,105 +434,8 @@ public class MainForm extends javax.swing.JFrame {
     private javax.swing.JTextField tfFind;
     private javax.swing.JTextPane tp;
     // End of variables declaration//GEN-END:variables
-
-
-
-    private boolean SetCardPIN()
-    {
-        try 
-        {
-            byte[] installData = new byte[10]; // no special install data passed now - can be used to pass initial keys etc.
-            //cardManager.prepareLocalSimulatorApplet(APPLET_AID, installData, eNoteApplet.class); 
-            byte apdu_setPIN[]={(byte) 0xB0,(byte) 0x50,(byte) 0x00,(byte) 0x00,(byte) 0x04,
-                      (byte) 0x30,(byte) 0x31,(byte) 0x30,(byte) 0x31};
-        byte[] resp1 = cardManager.sendAPDUSimulator(apdu_setPIN);
-        if((resp1[(resp1.length)-2])== (byte) 0x90)
-            System.out.println("***PIN set success***");
-        else{
-            System.out.println("PIN set failed with error code "+ cardManager.bytesToHex(resp1));
-            return false;
-        }
-        } 
-        catch (Exception ex) {
-            System.out.println("Exception : " + ex);
-        }
-        this.pd.ResetCounter=1;
-        JOptionPane.showMessageDialog(this, "The user pin is set successfully");
-        return true;
-        
-    }
-    
-    private boolean ConnectCard()
-    {
-        try 
-        {
-            byte[] installData = new byte[10]; // no special install data passed now - can be used to pass initial keys etc.
-            cardManager.prepareLocalSimulatorApplet(APPLET_AID, installData, eNoteApplet.class);  
-            //if (cardManager.ConnectToCard())
-            //    cardManager.sendAPDU(SELECT_ENOTESAPPLET);
-    
-            System.out.println("Card Connected");
-//            if( this.pd.ResetCounter == 0)
-//            {
-//                System.out.println("First set the PIN");
-//                JOptionPane.showMessageDialog(this, "First set the PIN");
-//                return false;
-//            }
-            
-            if( this.pd.UserAuth == 1)
-            {
-                System.out.println("User already connected!!");
-                JOptionPane.showMessageDialog(this, "User already connected!!");
-                return true;
-            }
-           
-            pd.SetCardManager(cardManager);
-            pd.setResizable(false);
-            pd.setModal(true);
-            pd.setLocationRelativeTo(null);
-            pd.setVisible(true);                    
-            
-            if(pd.UserAuth == 0)
-            {
-                System.out.println("User not Authenticated!!");
-                pd.setVisible(false);
-                return false ;
-            }
-            else if(pd.Cancel == 1)
-            {
-                pd.setVisible(false);
-                return false ;                
-            }
-            
-           
-                       
-
-            
-        } catch (Exception ex) {
-            System.out.println("Exception : " + ex);
-        }
-        JOptionPane.showMessageDialog(this, "JavaCard connected");
-        return true ;
-    }
-    
-    void DisconnectCard() 
-    {
-        try
-        {
-            cardManager.DisconnectFromCard();
-            this.pd.Reintialize();
-            JOptionPane.showMessageDialog(this, "Card is disConnected");
-        }
-        catch (Exception ex) {
-            System.out.println("Exception : " + ex);
-        }
       
-    }
-
-      
-   
-   
-    private boolean canExit() {
+       private boolean canExit() {
         return checkSave(WHYSAVE_CLOSE) != OPT_CANCEL;
     }
     
@@ -590,7 +476,7 @@ public class MainForm extends javax.swing.JFrame {
         }
 
         if (docm.key == null) {
-            String pwd = PasswordDialog.getPassword(cardManager);
+            String pwd = PasswordDialog.getPassword(cardAPI);
             if (pwd == null)
                 return OPT_CANCEL;
             docm.setKey(pwd);
@@ -711,7 +597,7 @@ public class MainForm extends javax.swing.JFrame {
         Doc doc = new Doc();
         while (true) {
             try {
-                String pwd = PasswordDialog.getPassword(cardManager);
+                String pwd = PasswordDialog.getPassword(cardAPI);
                 if (pwd == null)
                     return false;
                 if (doc.doOpen(fOpen, pwd))
@@ -742,7 +628,63 @@ public class MainForm extends javax.swing.JFrame {
         return true;
     }
 
+    private boolean ConnectCard()
+    {
+        try 
+        {
+            if( this.pinDialog.UserAuth == 1)
+            {
+                System.out.println("User already connected!!");
+                JOptionPane.showMessageDialog(this, "User already connected!!");
+                return true;
+            }
+           
+            cardAPI.ConnectCard();
+            System.out.println("Card Connected");
+            
+            pinDialog.setCardAPI(cardAPI);
+            pinDialog.setResizable(false);
+            pinDialog.setModal(true);
+            pinDialog.setLocationRelativeTo(null);
+            pinDialog.setVisible(true);                    
+            
+            if(pinDialog.UserAuth == 0)
+            {
+                System.out.println("User not Authenticated!!");
+                pinDialog.setVisible(false);
+                return false ;
+            }
+            else if(pinDialog.Cancel == 1)
+            {
+                pinDialog.setVisible(false);
+                return false ;                
+            }
+            
+           
+                       
 
+            
+        } catch (Exception ex) {
+            System.out.println("Exception : " + ex);
+        }
+        JOptionPane.showMessageDialog(this, "JavaCard connected");
+        return true ;
+    }
+    
+    public void DisconnectCard() 
+    {
+        try
+        {
+            cardAPI.DisconnectFromCard();
+            this.pinDialog.Reintialize();
+            JOptionPane.showMessageDialog(this, "Card is disConnected");
+        }
+        catch (Exception ex) {
+            System.out.println("Exception : " + ex);
+        }
+      
+    }
+    
     /**
      * Highlight search words.
      */

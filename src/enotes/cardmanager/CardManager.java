@@ -15,7 +15,6 @@ import java.util.List;
 import javacard.framework.AID;
 import javax.smartcardio.*;
 
-
 /**
  *
  * @author dilip
@@ -26,20 +25,9 @@ public class CardManager {
     CardChannel m_channel = null;
     Card m_card = null;
     
-    public boolean m_card_authenticated = false;
-
-    public void setM_card_authenticated(boolean m_card_authenticated) {
-        this.m_card_authenticated = m_card_authenticated;
-    }
-    
     // Simulator related attributes
     private static CAD m_cad = null;
     private static JavaxSmartCardInterface m_simulator = null;
-
-    
-    private final byte selectCM[] = {
-        (byte) 0x00, (byte) 0xa4, (byte) 0x04, (byte) 0x00, (byte) 0x07, (byte) 0xa0, (byte) 0x00, (byte) 0x00,
-        (byte) 0x00, (byte) 0x18, (byte) 0x43, (byte) 0x4d};
 
     public static final byte OFFSET_CLA = 0x00;
     public static final byte OFFSET_INS = 0x01;
@@ -59,7 +47,7 @@ public class CardManager {
             System.out.println("No terminals found");
         }
 
-        //List numbers of Card readers
+        // List numbers of Card readers
         boolean cardFound = false;
         for (int i = 0; i < terminalList.size(); i++) {
             System.out.println(i + " : " + terminalList.get(i));
@@ -111,26 +99,6 @@ public class CardManager {
         }
 
         return data;
-    }
-
-    public void ProbeCardCommands() throws Exception {
-        // TODO: modify to probe for instruction
-        for (int i = 0; i <= 0; i++) {
-            byte apdu[] = new byte[HEADER_LENGTH];
-            apdu[OFFSET_CLA] = (byte) 0x00;
-            apdu[OFFSET_INS] = (byte) 0x00;
-            apdu[OFFSET_P1] = (byte) 0x00;
-            apdu[OFFSET_P2] = (byte) 0x00;
-            apdu[OFFSET_LC] = (byte) 0x00;
-
-            ResponseAPDU resp = sendAPDU(apdu);
-            
-            System.out.println("Response: " + Integer.toHexString(resp.getSW()));  
-            
-            if (resp.getSW() != 0x6D00) { // Note: 0x6D00 is SW_INS_NOT_SUPPORTED
-                // something?
-            }
-        }
     }
     
     public List GetReaderList() {
@@ -207,13 +175,13 @@ public class CardManager {
     }
     
     public byte[] sendAPDUSimulator(byte apdu[]) throws Exception {
-        //System.out.println(">>>>");
-        //System.out.println(bytesToHex(apdu));
+        System.out.println(">>>>");
+        System.out.println(bytesToHex(apdu));
 
         byte[] responseBytes = m_simulator.transmitCommand(apdu);
 
-        //System.out.println(bytesToHex(responseBytes));
-        //System.out.println("<<<<");
+        System.out.println(bytesToHex(responseBytes));
+        System.out.println("<<<<");
 
         return responseBytes;
     }

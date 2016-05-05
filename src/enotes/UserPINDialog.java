@@ -5,7 +5,7 @@
  */
 package enotes;
 
-import static enotes.MainForm.cardManager;
+import enotes.cardmanager.CardAPI;
 import enotes.cardmanager.CardManager;
 import java.security.Key;
 import javax.crypto.Cipher;
@@ -23,32 +23,14 @@ public class UserPINDialog extends javax.swing.JDialog {
     int Cancel = 0;
     int ResetCounter=0;
     int AttemptsNumber=0;
- 
-
-    CardManager cardManager ;
     
-       
-        private static byte[] AESKey = {(byte) 0x00, (byte) 0x01, (byte) 0x02, (byte) 0x03, (byte) 0x04, (byte) 0x05, (byte) 0x06,(byte) 0x07,
-                  (byte) 0x08, (byte) 0x09, (byte) 0x0A, (byte) 0x0B, (byte) 0x0C, (byte) 0x0D, (byte) 0x0E,(byte) 0x0F};
-///////////Aes enc dec//////////////////////    
-        // Performs Encryption
-        public static byte[] encrypt(byte[] plainText, byte[] encKey) throws Exception 
-        {
-                Key key = new SecretKeySpec(encKey, "AES");
-                Cipher chiper = Cipher.getInstance("AES/ECB/NoPadding");
-                chiper.init(Cipher.ENCRYPT_MODE, key);
-                byte[] encVal = chiper.doFinal(plainText);
-                return encVal;
-        }
-        // Performs decryption
-        public static byte[] decrypt(byte[] encryptedText, byte[] decKey) throws Exception 
-        {
-                Key key = new SecretKeySpec(decKey, "AES");
-                Cipher chiper = Cipher.getInstance("AES/ECB/NoPadding");
-                chiper.init(Cipher.DECRYPT_MODE, key);
-                byte[] decValue = chiper.doFinal(encryptedText);
-                return decValue;
-        }
+    CardAPI cardAPI;
+    
+    public void setCardAPI(CardAPI cardAPI) {
+        this.cardAPI = cardAPI;
+    }
+
+
     /**
      * Creates new form UserPINDialog
      */
@@ -179,7 +161,7 @@ public class UserPINDialog extends javax.swing.JDialog {
     {
         //String p2 = new String("1234");
        
-        if (!CheckPIN()) {
+        if (!cardAPI.checkPIN(jPasswordField1.getPassword())) {
             JOptionPane.showMessageDialog(this, "The user pin do not match!");
             this.UserAuth = 0 ;
             this.AttemptsNumber +=1;
@@ -211,76 +193,6 @@ public class UserPINDialog extends javax.swing.JDialog {
     {
         this.UserAuth = 0 ;
         this.Cancel = 0;
-    }
-    
-    void SetCardManager(CardManager cardManager)
-    {
-        this.cardManager = cardManager ;
-        
-    }
-    
-    boolean CheckPIN()
-    {
-        try{
-            
-           //Validate PIN
-            short additionalDataLen1 = 16;
-            byte apdu1[] = new byte[CardManager.HEADER_LENGTH + additionalDataLen1];
-
-            apdu1[CardManager.OFFSET_CLA] = (byte) 0xB0;
-            apdu1[CardManager.OFFSET_INS] = (byte) 0x51;
-            apdu1[CardManager.OFFSET_P1] = (byte) 0x00;
-            apdu1[CardManager.OFFSET_P2] = (byte) 0x00;
-            apdu1[CardManager.OFFSET_LC] = (byte) additionalDataLen1;
-
-
-            char[] UserPIN1 = jPasswordField1.getPassword();
-            //byte UserPINB[];
-            
-            if(UserPIN1.length != 4){
-                System.out.println("Incorret PIN !!");
-                //System.exit(0);
-                return false ;                
-            }
-            byte[] UserPIN =new byte[16];    
-            //for(int i=0; i < UserPIN1.length; i++)
-            //    System.out.printf("0x%2x ",(byte)UserPIN1[i]);
-
-            for(int i=0; i<16; i++){
-                if(i<4)
-                    UserPIN[i]= (byte) UserPIN1[i];
-                else
-                    UserPIN[i]= (byte) 0;
-            }
-            byte[] encPIN = encrypt(UserPIN, AESKey);
-            byte[] apdu_VerifyPIN;
-                //System.arraycopy(apdu1_header, 0, apdu_VerifyPIN, 0, apdu_header.length);
-            System.arraycopy(encPIN, 0, apdu1, 5, encPIN.length);
-            
-            System.out.println("---PIN Validation Started---") ;             
-            System.out.printf("Input PIN for Validation: ") ;           
-            //System.out.println(cardManager.bytesToHex(UserPIN));
-
-            byte[] response1 = cardManager.sendAPDUSimulator(apdu1); 
-
-            if(response1[0] != 0x90 && response1[1] != 0x00){
-                System.out.println("Incorret PIN !!");
-                //System.exit(0);
-                return false ;
-            }
-            else
-            {
-                System.out.println("PIN is Validated Sucessfully!!") ;   
-            }
-
-            System.out.println("---PIN Validation Completed---") ;          
-            
-        }
-        catch(Exception ex) {
-            System.out.println("Exception : " + ex);
-        }
-        cardManager.setM_card_authenticated(true);
-        return true;
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
